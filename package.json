@@ -1,5 +1,5 @@
 {
-  "name": "week6.server",
+  "name": "week6",
   "version": "1.0.0",
   "description": "Server Week 6 del Bootcamp",
   "type": "module",
@@ -11,7 +11,7 @@
     "test": "jest --watchAll --coverage"
   },
   "keywords": [],
-  "author": "Alejandro Cerezo",
+  "author": "Sergi Casiano",
   "license": "ISC",
   "prettier": {
     "singleQuote": true

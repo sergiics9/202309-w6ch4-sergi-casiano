@@ -1,5 +1,4 @@
 import { createServer } from 'http';
-import 'dotenv/config';
 import { program } from 'commander';
 
 program.option('-p, --port <value>');
@@ -10,30 +9,98 @@ const options = program.opts();
 const PORT = options.port || process.env.PORT || 3030;
 
 const server = createServer((req, res) => {
-  if (req.method !== 'GET') {
-    res.statusCode = 405;
-    res.statusMessage = 'Method not allowed today';
-    res.write('Unsupported method');
+  const url = new URL(req.url as string, `http://${req.headers.host}`);
+
+  console.log('soy url', url);
+  console.log('hola', req.headers.host);
+
+  if (url.pathname !== '/calculator') {
+    res.statusCode = 404;
+    res.statusMessage = 'Error 404';
+    res.write('Error 404');
     res.end();
+    return;
   }
 
-  console.log(req.url);
-  console.log(req.headers.host);
+  const paramA = url.searchParams.get('d');
+  const paramB = url.searchParams.get('e');
 
-  const url = new URL(req.url as string, `http://${req.headers.host}`);
-  console.log('url', url);
+  if (!paramA || !paramB || isNaN(Number(paramA)) || isNaN(Number(paramB))) {
+    res.statusCode = 400;
+    res.statusMessage = 'Bad Request';
+    res.setHeader('Content-type', 'text/html');
+    res.write('<h1>Error</h1>');
+    res.write('<p>Proporcione numeros validos para los parametros a y b.</p>');
+    res.end();
+    return;
+  }
 
   res.setHeader('Content-type', 'text/html');
-  res.write('<h1>Hola Mundo</h1>');
+  res.write(`<h1>Calculadora</h1>`);
+  res.write(
+    `<p>${Number(paramA)} + ${Number(paramB)} = ${
+      Number(paramA) + Number(paramB)
+    }</p>`
+  );
+  res.write(
+    `<p>${Number(paramA)} - ${Number(paramB)} = ${
+      Number(paramA) - Number(paramB)
+    }</p>`
+  );
+  res.write(
+    `<p>${Number(paramA)} * ${Number(paramB)} = ${
+      Number(paramA) * Number(paramB)
+    }</p>`
+  );
+  res.write(
+    `<p>${Number(paramA)} / ${Number(paramB)} = ${
+      Number(paramA) / Number(paramB)
+    }</p>`
+  );
   res.end();
 });
 
 server.listen(PORT);
 
-server.on('listening', () => {
-  console.log('Listening on port', PORT);
-});
-
 server.on('error', (error) => {
   console.log(error.message);
 });
+
+// ⠀⠀⠀⠀⠀⠀⠀⣠⣤⣤⣤⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⢰⡿⠋⠁⠀⠀⠈⠉⠙⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⢀⣿⠇⠀⢀⣴⣶⡾⠿⠿⠿⢿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⣀⣀⣸⡿⠀⠀⢸⣿⣇⠀⠀⠀⠀⠀⠀⠙⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⣾⡟⠛⣿⡇⠀⠀⢸⣿⣿⣷⣤⣤⣤⣤⣶⣶⣿⠇⠀⠀⠀⠀⠀⠀⠀⣀⠀⠀
+// ⢀⣿⠀⢀⣿⡇⠀⠀⠀⠻⢿⣿⣿⣿⣿⣿⠿⣿⡏⠀⠀⠀⠀⢴⣶⣶⣿⣿⣿⣆
+// ⢸⣿⠀⢸⣿⡇⠀⠀⠀⠀⠀⠈⠉⠁⠀⠀⠀⣿⡇⣀⣠⣴⣾⣮⣝⠿⠿⠿⣻⡟
+// ⢸⣿⠀⠘⣿⡇⠀⠀⠀⠀⠀⠀⠀⣠⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠁⠉⠀
+// ⠸⣿⠀⠀⣿⡇⠀⠀⠀⠀⠀⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠉⠀⠀⠀⠀
+// ⠀⠻⣷⣶⣿⣇⠀⠀⠀⢠⣼⣿⣿⣿⣿⣿⣿⣿⣛⣛⣻⠉⠁⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⢸⣿⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⢸⣿⣀⣀⣀⣼⡿⢿⣿⣿⣿⣿⣿⡿⣿⣿⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠙⠛⠛⠛⠋⠁⠀⠙⠻⠿⠟⠋⠑⠛⠋⠀
+
+// ────────────▄▀░░░░░▒▒▒█─
+// ───────────█░░░░░░▒▒▒█▒█
+// ──────────█░░░░░░▒▒▒█▒░█
+// ────────▄▀░░░░░░▒▒▒▄▓░░█
+// ───────█░░░░░░▒▒▒▒▄▓▒░▒▓
+// ──────█▄▀▀▀▄▄▒▒▒▒▓▀▒░░▒▓
+// ────▄▀░░░░░░▒▀▄▒▓▀▒░░░▒▓
+// ───█░░░░░░░░░▒▒▓▀▒░░░░▒▓
+// ───█░░░█░░░░▒▒▓█▒▒░░░▒▒▓
+// ────█░░▀█░░▒▒▒█▒█░░░░▒▓▀
+// ─────▀▄▄▀▀▀▄▄▀░█░░░░▒▒▓─
+// ───────────█▒░░█░░░▒▒▓▀─
+// ────────────█▒░░█▒▒▒▒▓──
+// ─────────────▀▄▄▄▀▄▄▀─
+
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣶⣾⣿⣶⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⣿⣿⣶⣶⣶⣶⣶⣶⣶⣿⣶⣦⡀⢀⣾⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢸⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⣀⣤⡀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⡿⣱⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⢸⣿⣿⣿⣿⣿⣿⣿⠟⣀⣴⣾⣿⣿⣿⣦⣀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡿⣱⣿⣿⣿⣿⣿⣿⠟⢛⣉⣉⣉⣉⣙⣛⣛⠛⣿⣿⣿⣿⢃⡈⣿⣿⣿⡟⡉⣉⣵⣾⣿⣿⣿⣿⣿⣿⣿⣿⣷⣄⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠿⣱⣿⣿⣿⣿⣿⡿⢡⣾⣿⣿⣿⣿⣿⣿⣿⣿⡇⣿⣿⣿⡟⣸⣷⠸⣿⣿⢱⣿⣿⣿⣿⣿⣿⣿⡿⠻⢿⣿⣿⣿⣿⣷⣄⠀
+// ⣀⣤⣤⣤⣤⣤⣤⣤⣤⣴⣿⣿⣿⣿⣿⡟⠁⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢰⣿⣿⣿⣧⣭⣛⣁⣙⣋⣘⠻⣿⣿⣿⣿⣿⠟⠀⠀⠀⠙⢿⣿⣿⣿⣿⣧
+// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡷⣸⣿⠿⠋⠁⠀⠀⠀⠀⠀⠀⠙⠿⣿⣿⡿
+// ⠈⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠉⠉⠉⠉⠉⠉⠉⠉⠀⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀69
